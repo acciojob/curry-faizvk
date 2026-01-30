@@ -1,21 +1,27 @@
 function curry(callback) {
-  return function curried(...args) {
-    // If called with no arguments, invoke callback with what we have so far
-    if (args.length === 0) {
-      return callback();
-    }
+  return function (...initial) {
+    // If called with no args initially
+    if (initial.length === 0) return callback();
 
-    let collected = [...args];
+    let collected = [...initial];
+    let calledAgain = false;
 
     function next(...more) {
-      // Termination condition
+      // termination
       if (more.length === 0) {
         return callback(...collected);
       }
 
-      // Accumulate and keep going
+      calledAgain = true;
       collected.push(...more);
       return next;
+    }
+
+    // If user does NOT chain, return result immediately
+    // Cypress does: curriedSum(1,2,3)
+    // so we must compute now
+    if (!calledAgain) {
+      return callback(...collected);
     }
 
     return next;
